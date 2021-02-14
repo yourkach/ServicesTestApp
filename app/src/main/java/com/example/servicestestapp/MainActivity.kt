@@ -15,11 +15,13 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
+    private var rebindOnReturn = false
+
     private var myService: MyService? = null
     private var isServiceBound: Boolean = false
         set(value) {
             field = value
-            tvServiceState.text = if (value) "Service is bound" else "Service is not bound"
+            tvServiceState.text = if (value) "Service is bound now" else "Service is not bound"
         }
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
@@ -32,6 +34,13 @@ class MainActivity : AppCompatActivity() {
         override fun onServiceDisconnected(arg0: ComponentName) {
             isServiceBound = false
             Log.d("Activity", "onServiceDisconnected")
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (rebindOnReturn) {
+            bindMyService()
         }
     }
 
@@ -53,6 +62,10 @@ class MainActivity : AppCompatActivity() {
         btnBindService.setOnClickListener { bindMyService() }
         btnUnbindService.setOnClickListener { unbindMyService() }
         btnShowNotification.setOnClickListener { showTextNotification() }
+        ctvRebindOnReturn.setOnClickListener {
+            rebindOnReturn = !rebindOnReturn
+            ctvRebindOnReturn.isChecked = rebindOnReturn
+        }
         etNotificationText.setOnEditorActionListener { view, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) view.clearFocus()
             false
